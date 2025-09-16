@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weird Opinions - Ask the Weird Questions</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    <script src="https://unpkg.com/react-router-dom@6.14.1/dist/umd/react-router-dom.development.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #667eea;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .main-content {
+            padding: 2rem 0;
+            min-height: calc(100vh - 80px);
+        }
+
+        .hero {
+            text-align: center;
+            color: white;
+            padding: 4rem 0;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .question-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .category-tag {
+            background: #f0f2ff;
+            color: #667eea;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .question-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .question-description {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .question-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #888;
+        }
+
+        .author {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .vote-section {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .vote-btn {
+            background: none;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 0.25rem 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.875rem;
+        }
+
+        .vote-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .vote-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .poll-options {
+            margin: 1rem 0;
+        }
+
+        .poll-option {
+            background: #f8f9ff;
+            border: 2px solid #eef1ff;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .poll-option:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .poll-option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .poll-percentage {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .comments-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .comment {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 0.875rem;
+        }
+
+        .comment-content {
+            margin: 0.5rem 0;
+            line-height: 1.5;
+        }
+
+        .comment-time {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .trending-badge {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .category-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .category-card:hover {
+            background: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .category-card.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .question-header {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, createContext, useContext } = React;
+        const { BrowserRouter: Router, Routes, Route, Link, useNavigate, useParams } = ReactRouterDOM;
+
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:8080/api';
+
+        const api = axios.create({
+            baseURL: API_BASE_URL,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        // Auth Context
+        const AuthContext = createContext();
+
+        const useAuth = () => {
+            const context = useContext(AuthContext);
+            if (!context) {
+                throw new Error('useAuth must be used within an AuthProvider');
+            }
+            return context;
+        };
+
+        const AuthProvider = ({ children }) => {
+            const [user, setUser] = useState(null);
+            const [token, setToken] = useState(localStorage.getItem('token'));
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                if (token) {
+                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                    // You could verify the token here
+                }
+                setLoading(false);
+            }, [token]);
+
+            const login = async (usernameOrEmail, password) => {
+                try {
+                    const response = await api.post('/auth/signin', {
+                        usernameOrEmail,
+                        password
+                    });
+                    
+                    const { accessToken, user } = response.data;
+                    localStorage.setItem('token', accessToken);
+                    setToken(accessToken);
+                    setUser(user);
+                    api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+                    
+                    return { success: true };
+                } catch (error) {
+                    return { 
+                        success: false, 
+                        error: error.response?.data?.error || 'Login failed' 
+                    };
+                }
+            };
+
+            const register = async (username, email, password) => {
+                try {
+                    const response = await api.post('/auth/signup', {
+                        username,
+                        email,
+                        password
+                    });
+                    
+                    return { success: true, message: response.data.message };
+                } catch (error) {
+                    return { 
+                        success: false, 
+                        error: error.response?.data?.error || 'Registration failed' 
+                    };
+                }
+            };
+
+            const logout = () => {
+                localStorage.removeItem('token');
+                setToken(null);
+                setUser(null);
+                delete api.defaults.headers.common['Authorization'];
+            };
+
+            const value = {
+                user,
+                token,
+                login,
+                register,
+                logout,
+                loading
+            };
+
+            return (
+                <AuthContext.Provider value={value}>
+                    {children}
+                </AuthContext.Provider>
+            );
+        };
+
+        // Components
+        const Navbar = () => {
+            const { user, logout } = useAuth();
+            const [showAuthModal, setShowAuthModal] = useState(false);
+
+            return (
+                <>
+                    <nav className="navbar">
+                        <div className="container">
+                            <div className="nav-content">
+                                <Link to="/" className="logo">
+                                    🤔 Weird Opinions
+                                </Link>
+                                <div className="nav-links">
+                                    <Link to="/" className="nav-link">Home</Link>
+                                    <Link to="/trending" className="nav-link">Trending</Link>
+                                    {user ? (
+                                        <>
+                                            <Link to="/my-questions" className="nav-link">My Questions</Link>
+                                            <button 
+                                                className="btn btn-secondary"
+                                                onClick={logout}
+                                            >
+                                                Logout
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button 
+                                            className="btn btn-primary"
+                                            onClick={() => setShowAuthModal(true)}
+                                        >
+                                            Login / Sign Up
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                    
+                    {showAuthModal && (
+                        <AuthModal onClose={() => setShowAuthModal(false)} />
+                    )}
+                </>
+            );
+        };
+
+        const AuthModal = ({ onClose }) => {
+            const [isLogin, setIsLogin] = useState(true);
+            const [formData, setFormData] = useState({
+                username: '',
+                email: '',
+                password: '',
+                usernameOrEmail: ''
+            });
+            const [error, setError] = useState('');
+            const [loading, setLoading] = useState(false);
+            const { login, register } = useAuth();
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setError('');
+
+                try {
+                    let result;
+                    if (isLogin) {
+                        result = await login(formData.usernameOrEmail, formData.password);
+                    } else {
+                        result = await register(formData.username, formData.email, formData.password);
+                    }
+
+                    if (result.success) {
+                        if (isLogin) {
+                            onClose();
+                        } else {
+                            setIsLogin(true);
+                            setError('Registration successful! Please log in.');
+                        }
+                    } else {
+                        setError(result.error);
+                    }
+                } catch (err) {
+                    setError('Something went wrong. Please try again.');
+                }
+                
+                setLoading(false);
+            };
+
+            const handleChange = (e) => {
+                setFormData({
+                    ...formData,
+                    [e.target.name]: e.target.value
+                });
+            };
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2 className="modal-title">
+                                {isLogin ? 'Welcome Back!' : 'Join the Weirdness'}
+                            </h2>
+                            <button className="close-btn" onClick={onClose}>×</button>
+                        </div>
+                        
+                        {error && <div className="error">{error}</div>}
+                        
+                        <form onSubmit={handleSubmit}>
+                            {isLogin ? (
+                                <>
+                                    <div className="form-group">
+                                        <label className="form-label">Username or Email</label>
+                                        <input
+                                            type="text"
+                                            name="usernameOrEmail"
+                                            className="form-input"
+                                            value={formData.usernameOrEmail}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Password</label>
+                                        <input
+                                            type="password"
+                                            name="password"
+                                            className="form-input"
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="form-group">
+                                        <label className="form-label">Username</label>
+                                        <input
+                                            type="text"
+                                            name="username"
+                                            className="form-input"
+                                            value={formData.username}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Email</label>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            className="form-input"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Password</label>
+                                        <input
+                                            type="password"
+                                            name="password"
+                                            className="form-input"
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                </>
+                            )}
+                            
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                                style={{ width: '100%', marginBottom: '1rem' }}
+                                disabled={loading}
+                            >
+                                {loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Sign Up')}
+                            </button>
+                        </form>
+                        
+                        <p style={{ textAlign: 'center', color: '#666' }}>
+                            {isLogin ? "Don't have an account? " : "Already have an account? "}
+                            <button
+                                type="button"
+                                style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', textDecoration: 'underline' }}
+                                onClick={() => {
+                                    setIsLogin(!isLogin);
+                                    setError('');
+                                    setFormData({
+                                        username: '',
+                                        email: '',
+                                        password: '',
+                                        usernameOrEmail: ''
+                                    });
+                                }}
+                            >
+                                {isLogin ? 'Sign up here' : 'Sign in here'}
+                            </button>
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+
+        const QuestionCard = ({ question, onVote, onPollVote, onClick }) => {
+            const { user } = useAuth();
+            const [showComments, setShowComments] = useState(false);
+            const [comments, setComments] = useState([]);
+            const [newComment, setNewComment] = useState('');
+            const [loadingComments, setLoadingComments] = useState(false);
+
+            const categories = {
+                SOCIAL_NORMS: 'Social Norms',
+                PERSONAL_HABITS: 'Personal Habits',
+                QUIRKY_THOUGHTS: 'Quirky Thoughts',
+                WEIRD_FOOD_COMBOS: 'Food Combos',
+                HOME_LIFE: 'Home Life',
+                CRINGE_CONFESSIONS: 'Confessions',
+                BATHROOM_ETIQUETTE: 'Bathroom Etiquette',
+                PET_PECULIARITIES: 'Pet Stuff',
+                PUBLIC_TRANSPORT_MYSTERIES: 'Transport',
+                FASHION_CHOICES: 'Fashion',
+                OTHER: 'Other'
+            };
+
+            const loadComments = async () => {
+                if (!showComments) {
+                    setLoadingComments(true);
+                    try {
+                        const response = await api.get(`/questions/${question.id}/comments`);
+                        setComments(response.data);
+                    } catch (error) {
+                        console.error('Error loading comments:', error);
+                    }
+                    setLoadingComments(false);
+                }
+                setShowComments(!showComments);
+            };
+
+            const handleCommentSubmit = async (e) => {
+                e.preventDefault();
+                if (!newComment.trim() || !user) return;
+
+                try {
+                    const response = await api.post('/comments', {
+                        content: newComment,
+                        questionId: question.id
+                    });
+                    setComments([...comments, response.data]);
+                    setNewComment('');
+                } catch (error) {
+                    console.error('Error posting comment:', error);
+                }
+            };
+
+            const formatTimeAgo = (timestamp) => {
+                const now = new Date();
+                const time = new Date(timestamp);
+                const diffInSeconds = Math.floor((now - time) / 1000);
+                
+                if (diffInSeconds < 60) return 'just now';
+                if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+                if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+                return `${Math.floor(diffInSeconds / 86400)}d ago`;
+            };
+
+            const getPollResults = () => {
+                if (!question.pollVotes || !question.pollOptions) return [];
+                
+                const total = question.pollVotes.length;
+                if (total === 0) return question.pollOptions.map(() => 0);
+                
+                const results = new Array(question.pollOptions.length).fill(0);
+                question.pollVotes.forEach(vote => {
+                    results[vote.optionIndex]++;
+                });
+                
+                return results.map(count => Math.round((count / total) * 100));
+            };
+
+            return (
+                <div className="question-card">
+                    <div className="question-header">
+                        <span className="category-tag">
+                            {categories[question.category] || question.category}
+                        </span>
+                        <div className="question-meta">
+                            <span className="author">{question.user?.anonymousName || 'Anonymous'}</span>
+                            <span>{formatTimeAgo(question.createdAt)}</span>
+                        </div>
+                    </div>
+                    
+                    <h3 className="question-title">{question.title}</h3>
+                    {question.description && (
+                        <p className="question-description">{question.description}</p>
+                    )}
+                    
+                    {question.imageUrl && (
+                        <img 
+                            src={question.imageUrl} 
+                            alt="Question"
+                            style={{ maxWidth: '100%', borderRadius: '8px', margin: '1rem 0' }}
+                        />
+                    )}
+
+                    {question.hasPoll && question.pollOptions && (
+                        <div className="poll-options">
+                            {question.pollOptions.map((option, index) => {
+                                const results = getPollResults();
+                                const percentage = results[index] || 0;
+                                
+                                return (
+                                    <div 
+                                        key={index}
+                                        className="poll-option"
+                                        onClick={() => user && onPollVote && onPollVote(question.id, index)}
+                                    >
+                                        <span>{option}</span>
+                                        <span className="poll-percentage">{percentage}%</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    <div className="vote-section">
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button 
+                                className="vote-btn"
+                                onClick={() => user && onVote && onVote(question.id, 'UPVOTE')}
+                                disabled={!user}
+                            >
+                                👍 {question.upvotes || 0}
+                            </button>
+                            <button 
+                                className="vote-btn"
+                                onClick={() => user && onVote && onVote(question.id, 'DOWNVOTE')}
+                                disabled={!user}
+                            >
+                                👎 {question.downvotes || 0}
+                            </button>
+                        </div>
+                        
+                        <button 
+                            className="vote-btn"
+                            onClick={loadComments}
+                        >
+                            💬 {comments.length} comments
+                        </button>
+                    </div>
+
+                    {showComments && (
+                        <div className="comments-section">
+                            {loadingComments ? (
+                                <div className="loading">Loading comments...</div>
+                            ) : (
+                                <>
+                                    {user && (
+                                        <form onSubmit={handleCommentSubmit} style={{ marginBottom: '1rem' }}>
+                                            <div className="form-group">
+                                                <textarea
+                                                    className="form-textarea"
+                                                    placeholder="Share your weird opinion..."
+                                                    value={newComment}
+                                                    onChange={(e) => setNewComment(e.target.value)}
+                                                    rows={3}
+                                                />
+                                            </div>
+                                            <button type="submit" className="btn btn-primary">
+                                                Comment
+                                            </button>
+                                        </form>
+                                    )}
+                                    
+                                    {comments.length === 0 ? (
+                                        <p style={{ color: '#666', textAlign: 'center' }}>
+                                            No comments yet. Be the first to share your opinion!
+                                        </p>
+                                    ) : (
+                                        comments.map((comment) => (
+                                            <div key={comment.id} className="comment">
+                                                <div className="comment-author">
+                                                    {comment.user?.anonymousName || 'Anonymous'}
+                                                </div>
+                                                <div className="comment-content">
+                                                    {comment.content}
+                                                </div>
+                                                <div className="comment-time">
+                                                    {formatTimeAgo(comment.createdAt)}
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const CreateQuestionModal = ({ isOpen, onClose, onSubmit }) => {
+            const [formData, setFormData] = useState({
+                title: '',
+                description: '',
+                category: 'OTHER',
+                pollOptions: ['', ''],
+                hasPoll: false,
+                imageUrl: ''
+            });
+
+            const categories = [
+                { value: 'SOCIAL_NORMS', label: 'Social Norms' },
+                { value: 'PERSONAL_HABITS', label: 'Personal Habits' },
+                { value: 'QUIRKY_THOUGHTS', label: 'Quirky Thoughts' },
+                { value: 'WEIRD_FOOD_COMBOS', label: 'Weird Food Combos' },
+                { value: 'HOME_LIFE', label: 'Home Life' },
+                { value: 'CRINGE_CONFESSIONS', label: 'Cringe Confessions' },
+                { value: 'BATHROOM_ETIQUETTE', label: 'Bathroom Etiquette' },
+                { value: 'PET_PECULIARITIES', label: 'Pet Peculiarities' },
+                { value: 'PUBLIC_TRANSPORT_MYSTERIES', label: 'Public Transport' },
+                { value: 'FASHION_CHOICES', label: 'Fashion Choices' },
+                { value: 'OTHER', label: 'Other' }
+            ];
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const questionData = {
+                    ...formData,
+                    pollOptions: formData.hasPoll ? formData.pollOptions.filter(opt => opt.trim()) : null
+                };
+                onSubmit(questionData);
+                setFormData({
+                    title: '',
+                    description: '',
+                    category: 'OTHER',
+                    pollOptions: ['', ''],
+                    hasPoll: false,
+                    imageUrl: ''
+                });
+            };
+
+            const addPollOption = () => {
+                setFormData({
+                    ...formData,
+                    pollOptions: [...formData.pollOptions, '']
+                });
+            };
+
+            const updatePollOption = (index, value) => {
+                const newOptions = [...formData.pollOptions];
+                newOptions[index] = value;
+                setFormData({
+                    ...formData,
+                    pollOptions: newOptions
+                });
+            };
+
+            const removePollOption = (index) => {
+                if (formData.pollOptions.length > 2) {
+                    const newOptions = formData.pollOptions.filter((_, i) => i !== index);
+                    setFormData({
+                        ...formData,
+                        pollOptions: newOptions
+                    });
+                }
+            };
+
+            if (!isOpen) return null;
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2 className="modal-title">Ask Your Weird Question</h2>
+                            <button className="close-btn" onClick={onClose}>×</button>
+                        </div>
+                        
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label className="form-label">Question Title *</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={formData.title}
+                                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                    placeholder="Is it weird to..."
+                                    required
+                                />
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Description (Optional)</label>
+                                <textarea
+                                    className="form-textarea"
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                    placeholder="Add more context to your question..."
+                                />
+                            </div>
+                            
+                            <div className="form-group">
+                                <label className="form-label">Category</label>
+                                <select
+                                    className="form-select"
+                                    value={formData.category}
+                                    onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                >
+                                    {categories.map(cat => (
+                                        <option key={cat.value} value={cat.value}>
+                                            {cat.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.hasPoll}
+                                        onChange={(e) => setFormData({...formData, hasPoll: e.target.checked})}
+                                    />
+                                    Add a poll to get quick opinions
+                                </label>
+                            </div>
+
+                            {formData.hasPoll && (
+                                <div className="form-group">
+                                    <label className="form-label">Poll Options</label>
+                                    {formData.pollOptions.map((option, index) => (
+                                        <div key={index} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                                            <input
+                                                type="text"
+                                                className="form-input"
+                                                value={option}
+                                                onChange={(e) => updatePollOption(index, e.target.value)}
+                                                placeholder={`Option ${index + 1}`}
+                                            />
+                                            {formData.pollOptions.length > 2 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removePollOption(index)}
+                                                    style={{ 
+                                                        background: '#ff4757', 
+                                                        color: 'white', 
+                                                        border: 'none', 
+                                                        borderRadius: '4px',
+                                                        padding: '0.5rem' 
+                                                    }}
+                                                >
+                                                    ×
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={addPollOption}
+                                        className="btn btn-secondary"
+                                        style={{ marginTop: '0.5rem' }}
+                                    >
+                                        + Add Option
+                                    </button>
+                                </div>
+                            )}
+                            
+                            <div className="form-group">
+                                <label className="form-label">Image URL (Optional)</label>
+                                <input
+                                    type="url"
+                                    className="form-input"
+                                    value={formData.imageUrl}
+                                    onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                                    placeholder="https://example.com/image.jpg"
+                                />
+                            </div>
+                            
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                                style={{ width: '100%' }}
+                            >
+                                Post Question
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        const Home = () => {
+            const [questions, setQuestions] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [selectedCategory, setSelectedCategory] = useState('ALL');
+            const [showCreateModal, setShowCreateModal] = useState(false);
+            const [page, setPage] = useState(0);
+            const [hasMore, setHasMore] = useState(true);
+            const { user } = useAuth();
+
+            const categories = [
+                { value: 'ALL', label: 'All Questions' },
+                { value: 'SOCIAL_NORMS', label: 'Social Norms' },
+                { value: 'PERSONAL_HABITS', label: 'Personal Habits' },
+                { value: 'QUIRKY_THOUGHTS', label: 'Quirky Thoughts' },
+                { value: 'WEIRD_FOOD_COMBOS', label: 'Food Combos' },
+                { value: 'HOME_LIFE', label: 'Home Life' },
+                { value: 'CRINGE_CONFESSIONS', label: 'Confessions' },
+                { value: 'BATHROOM_ETIQUETTE', label: 'Bathroom' },
+                { value: 'PET_PECULIARITIES', label: 'Pet Stuff' },
+                { value: 'PUBLIC_TRANSPORT_MYSTERIES', label: 'Transport' },
+                { value: 'FASHION_CHOICES', label: 'Fashion' },
+                { value: 'OTHER', label: 'Other' }
+            ];
+
+            const loadQuestions = async (category = 'ALL', pageNum = 0, append = false) => {
+                try {
+                    let response;
+                    if (category === 'ALL') {
+                        response = await api.get(`/questions?page=${pageNum}&size=10`);
+                    } else {
+                        response = await api.get(`/questions/category/${category}?page=${pageNum}&size=10`);
+                    }
+                    
+                    const newQuestions = response.data.content || [];
+                    
+                    if (append) {
+                        setQuestions(prev => [...prev, ...newQuestions]);
+                    } else {
+                        setQuestions(newQuestions);
+                    }
+                    
+                    setHasMore(!response.data.last);
+                } catch (error) {
+                    console.error('Error loading questions:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            useEffect(() => {
+                setLoading(true);
+                setPage(0);
+                loadQuestions(selectedCategory, 0, false);
+            }, [selectedCategory]);
+
+            const handleCategoryChange = (category) => {
+                setSelectedCategory(category);
+            };
+
+            const handleCreateQuestion = async (questionData) => {
+                try {
+                    const response = await api.post('/questions', questionData);
+                    setQuestions([response.data, ...questions]);
+                    setShowCreateModal(false);
+                } catch (error) {
+                    console.error('Error creating question:', error);
+                }
+            };
+
+            const handleVote = async (questionId, voteType) => {
+                try {
+                    await api.post(`/questions/${questionId}/vote`, { voteType });
+                    // Reload current page to update vote counts
+                    loadQuestions(selectedCategory, 0, false);
+                } catch (error) {
+                    console.error('Error voting:', error);
+                }
+            };
+
+            const handlePollVote = async (questionId, optionIndex) => {
+                try {
+                    await api.post(`/questions/${questionId}/poll-vote`, { optionIndex });
+                    // Reload current page to update poll results
+                    loadQuestions(selectedCategory, 0, false);
+                } catch (error) {
+                    console.error('Error poll voting:', error);
+                }
+            };
+
+            const loadMore = () => {
+                const nextPage = page + 1;
+                setPage(nextPage);
+                loadQuestions(selectedCategory, nextPage, true);
+            };
+
+            return (
+                <div className="main-content">
+                    <div className="container">
+                        <div className="hero">
+                            <h1>Ask Your Weirdest Questions</h1>
+                            <p>
+                                A safe space for all those strange thoughts that keep you awake at 3 AM.
+                                Get honest, anonymous opinions from fellow humans.
+                            </p>
+                            {user && (
+                                <button 
+                                    className="btn btn-primary"
+                                    onClick={() => setShowCreateModal(true)}
+                                >
+                                    Ask a Weird Question
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="categories-grid">
+                            {categories.map(category => (
+                                <div
+                                    key={category.value}
+                                    className={`category-card ${selectedCategory === category.value ? 'active' : ''}`}
+                                    onClick={() => handleCategoryChange(category.value)}
+                                >
+                                    {category.label}
+                                </div>
+                            ))}
+                        </div>
+
+                        {loading ? (
+                            <div className="loading">Loading weird questions...</div>
+                        ) : (
+                            <>
+                                {questions.length === 0 ? (
+                                    <div style={{ textAlign: 'center', color: 'white', padding: '2rem' }}>
+                                        <h3>No questions yet in this category</h3>
+                                        <p>Be the first to ask something weird!</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {questions.map(question => (
+                                            <QuestionCard
+                                                key={question.id}
+                                                question={question}
+                                                onVote={handleVote}
+                                                onPollVote={handlePollVote}
+                                            />
+                                        ))}
+                                        
+                                        {hasMore && (
+                                            <div style={{ textAlign: 'center', padding: '2rem' }}>
+                                                <button 
+                                                    className="btn btn-secondary"
+                                                    onClick={loadMore}
+                                                >
+                                                    Load More Questions
+                                                </button>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </>
+                        )}
+                    </div>
+
+                    <CreateQuestionModal
+                        isOpen={showCreateModal}
+                        onClose={() => setShowCreateModal(false)}
+                        onSubmit={handleCreateQuestion}
+                    />
+                </div>
+            );
+        };
+
+        const TrendingPage = () => {
+            const [trendingQuestions, setTrendingQuestions] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const { user } = useAuth();
+
+            useEffect(() => {
+                loadTrendingQuestions();
+            }, []);
+
+            const loadTrendingQuestions = async () => {
+                try {
+                    const response = await api.get('/questions/trending');
+                    setTrendingQuestions(response.data);
+                } catch (error) {
+                    console.error('Error loading trending questions:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const handleVote = async (questionId, voteType) => {
+                try {
+                    await api.post(`/questions/${questionId}/vote`, { voteType });
+                    loadTrendingQuestions();
+                } catch (error) {
+                    console.error('Error voting:', error);
+                }
+            };
+
+            const handlePollVote = async (questionId, optionIndex) => {
+                try {
+                    await api.post(`/questions/${questionId}/poll-vote`, { optionIndex });
+                    loadTrendingQuestions();
+                } catch (error) {
+                    console.error('Error poll voting:', error);
+                }
+            };
+
+            return (
+                <div className="main-content">
+                    <div className="container">
+                        <div className="hero">
+                            <h1>🔥 Trending Weirdness</h1>
+                            <p>The most popular weird questions this week</p>
+                        </div>
+
+                        {loading ? (
+                            <div className="loading">Loading trending questions...</div>
+                        ) : (
+                            <>
+                                {trendingQuestions.length === 0 ? (
+                                    <div style={{ textAlign: 'center', color: 'white', padding: '2rem' }}>
+                                        <h3>No trending questions yet</h3>
+                                        <p>Be part of starting the conversation!</p>
+                                    </div>
+                                ) : (
+                                    trendingQuestions.map((question, index) => (
+                                        <div key={question.id} style={{ position: 'relative' }}>
+                                            {index < 3 && (
+                                                <span className="trending-badge">
+                                                    🔥 #{index + 1} Trending
+                                                </span>
+                                            )}
+                                            <QuestionCard
+                                                question={question}
+                                                onVote={handleVote}
+                                                onPollVote={handlePollVote}
+                                            />
+                                        </div>
+                                    ))
+                                )}
+                            </>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const MyQuestionsPage = () => {
+            const [myQuestions, setMyQuestions] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const { user } = useAuth();
+            const navigate = useNavigate();
+
+            useEffect(() => {
+                if (!user) {
+                    navigate('/');
+                    return;
+                }
+                loadMyQuestions();
+            }, [user, navigate]);
+
+            const loadMyQuestions = async () => {
+                try {
+                    const response = await api.get('/users/my-questions');
+                    setMyQuestions(response.data.content || []);
+                } catch (error) {
+                    console.error('Error loading my questions:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const handleVote = async (questionId, voteType) => {
+                try {
+                    await api.post(`/questions/${questionId}/vote`, { voteType });
+                    loadMyQuestions();
+                } catch (error) {
+                    console.error('Error voting:', error);
+                }
+            };
+
+            const handlePollVote = async (questionId, optionIndex) => {
+                try {
+                    await api.post(`/questions/${questionId}/poll-vote`, { optionIndex });
+                    loadMyQuestions();
+                } catch (error) {
+                    console.error('Error poll voting:', error);
+                }
+            };
+
+            if (!user) {
+                return null;
+            }
+
+            return (
+                <div className="main-content">
+                    <div className="container">
+                        <div className="hero">
+                            <h1>My Weird Questions</h1>
+                            <p>Your contribution to the weirdness of the world</p>
+                        </div>
+
+                        {loading ? (
+                            <div className="loading">Loading your questions...</div>
+                        ) : (
+                            <>
+                                {myQuestions.length === 0 ? (
+                                    <div style={{ textAlign: 'center', color: 'white', padding: '2rem' }}>
+                                        <h3>You haven't asked any weird questions yet</h3>
+                                        <p>Time to share some of your strangest thoughts!</p>
+                                        <Link to="/" className="btn btn-primary" style={{ marginTop: '1rem' }}>
+                                            Ask Your First Question
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    myQuestions.map(question => (
+                                        <QuestionCard
+                                            key={question.id}
+                                            question={question}
+                                            onVote={handleVote}
+                                            onPollVote={handlePollVote}
+                                        />
+                                    ))
+                                )}
+                            </>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            return (
+                <AuthProvider>
+                    <Router>
+                        <div className="App">
+                            <Navbar />
+                            <Routes>
+                                <Route path="/" element={<Home />} />
+                                <Route path="/trending" element={<TrendingPage />} />
+                                <Route path="/my-questions" element={<MyQuestionsPage />} />
+                            </Routes>
+                        </div>
+                    </Router>
+                </AuthProvider>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
